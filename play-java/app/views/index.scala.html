@@ -1,0 +1,213 @@
+@(title: String)
+
+<!DOCTYPE html >
+<html ng-app="myModule">
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Recordings</title>
+    <link href='@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.css")' type="text/css" rel="stylesheet">
+    <link href='@routes.Assets.at("css/my.css")' type="text/css" rel="stylesheet">
+    <script src='@routes.Assets.at("bower_components/angular/angular.js")'></script>
+    <script src='@routes.Assets.at("bower_components/angular-bootstrap/ui-bootstrap-tpls.min.js")'></script>
+    <script src='@routes.Assets.at("js/records.js")'></script>
+
+</head>
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">server-name</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <form class="navbar-form navbar-right" role="form">
+                <div class="form-group">
+                    <input type="text" placeholder="Email" class="form-control">
+                </div>
+                <div class="form-group">
+                    <input type="password" placeholder="Password" class="form-control">
+                </div>
+                <button type="submit" class="btn btn-success">Sign in</button>
+            </form>
+        </div>
+        <!--/.navbar-collapse -->
+    </div>
+</div>
+
+<!-- Main jumbotron for a primary marketing message or call to action -->
+<div class="jumbotron" style="margin-bottom: 15px; padding-bottom: 10px">
+    <div class="container">
+        <h1>Recording</h1>
+
+        <p>
+            Gives you a easy way to search,filter and download records.
+            Enjoy!
+            <a style="margin: 10px" class="btn btn-primary " role="button">Learn more &raquo;</a>
+        </p>
+
+
+    </div>
+</div>
+
+<!-- Main recording table -->
+<div class="container" ng-controller="RecordsCtrl">
+    <!--// DownLoad modal-->
+    <script type="text/ng-template" id="myModalContent.html">
+        <div class="modal-header">
+            <h3 class="modal-title">Download records</h3>
+        </div>
+
+        <div class="modal-body">
+            <p>
+                <label>you have choosen:</label>
+                <em>{{choosenRecords.length}} reccords</em>
+            </p>
+            Choose format:
+            <div class="btn-group">
+                <label class="btn btn-default" ng-model="radioModel" btn-radio="'rti'" uncheckable>Rti record</label>
+                <label class="btn btn-default" ng-model="radioModel" btn-radio="'csv'" uncheckable>CSV</label>
+            </div>
+            <p>
+               <br>
+              <small>  *notice if you choose number of files they will be compressed to zip </small>
+            </p>
+        </div>
+        <div class="modal-footer">
+            <a href="{{createDownloadUrl()}}" download>
+                <button class="btn btn-success" ng-click="ok()" ng-disabled="disable()">DownLoad</button>
+            </a>
+            <button class="btn btn-warning" ng-click="ftp()" ng-disabled="disable()">FTP</button>
+
+            <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+            <div ng-show="showProbar">
+                <hr>
+                {{msg}}
+                <progressbar class="progress-striped active" max="100" value="100" type="success">Uploading...</progressbar>
+            </div>
+        </div>
+    </script>
+
+    <!--Filert scope-->
+    <div class="form-horizontal">
+        <div class="form-group">
+            <label class="control-label col-sm-2">
+                Old records (Zipped):
+            </label>
+            <label class="control-label col-sm-1 " style="text-align: left">
+                <input type="checkbox" ng-model="show">
+            </label>
+        </div>
+        <div class="form-group" style="margin-bottom: 0px">
+            <label class="control-label col-sm-2">Search:</label>
+
+            <div class="col-sm-2">
+                <input class="form-control" ng-model="searchText" ng-change="currentPage=1" placeholder="Record name">
+            </div>
+
+        </div>
+
+        <div class="form-group" style="margin-bottom: 0px">
+
+            <label class="fixed-date-label col-sm-2" style="text-align: right">Date filter:</label>
+
+            <div class="col-md-2 fixed-datepicker">
+                <p class="input-group">
+                    <input type="text" class="form-control" datepicker-popup="dd/MM/yyyy" ng-model="startDate"
+                           is-open="startOpened" min-date="minDate"  show-button-bar="false"
+                           ng-required="true" placeholder="Start date"/>
+                 <span class="input-group-btn">
+                   <button type="button" class="btn btn-default" ng-click="openStart($event)"><i
+                           class="glyphicon glyphicon-calendar"></i></button>
+                 </span>
+                </p>
+            </div>
+            <div class="col-md-2">
+                <timepicker ng-model="startTime" hour-step="1" minute-step="15" show-meridian="false"></timepicker>
+            </div>
+
+            <label class="fixed-date-label pull-left" style="text-align: right">to:</label>
+
+            <div class="col-md-2 fixed-datepicker">
+                <p class="input-group">
+                    <input type="text" class="form-control" datepicker-popup="dd/MM/yyyy" ng-model="endDate"
+                           is-open="endOpened" min-date="minDate"  show-button-bar="false"
+                           ng-required="true" placeholder="End date"/>
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default" ng-click="openEnd($event)"><i
+                        class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+                </p>
+            </div>
+
+            <div class="col-md-2">
+                <timepicker ng-model="endTime" hour-step="1" minute-step="15" show-meridian="false"></timepicker>
+            </div>
+
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-sm-4 col-sm-offset-8 text-right">
+                <button class="btn  btn-default " ng-click="clearChoosen()">Clear</button>
+                <button class="btn  btn-success " ng-click="open()">Download!</button>
+            </div>
+        </div>
+
+
+    </div>
+
+    <div class=" col-sm-12 fixed-table-body">
+        <table class=" table table-hover ">
+            <thead>
+            <tr class="tr-records">
+                <th class="td-rec1"></th>
+                <th ng-click="reverse=!reverse;order('name', reverse)" class="td-rec2">
+                    Name
+                    <span ng-class="arrowNameClass"></span>
+                </th>
+                <th ng-click="reverse=!reverse;order('date', reverse)" class="td-rec3">
+                    Date
+                    <span ng-class="arrowDateClass"></span>
+                </th>
+                <th ng-click="reverse=!reverse;order('size', reverse)" class="td-rec4">
+                    Size (KB)
+                    <span ng-class="arrowSizeClass"></span>
+                </th>
+            </tr>
+            </thead>
+
+            <tbody class="tbody-rec">
+            <tr ng-class="{success :record.checked}"
+                ng-repeat="record  in filteredRecs = ( recordsList |filter:showZipped(show) |filter:searchText| filter:dateRange(startDate,startTime,endDate,endTime) | filter:subArray(currentPage))"
+                ng-click="setChecked(record)" class="tr-records">
+                <td style="width: 8%" class="td-rec1">
+                    <input type="checkbox" ng-model="record.checked" ng-change="setChecked(record)">
+
+                </td>
+                <td style="" class="td-rec2"> {{ record.name}}</td>
+                <td style="" class="td-rec3">{{record.date | date:'short'}}</td>
+                <td style="" class="td-rec4">{{record.size /1000}}</td>
+
+            </tr>
+
+            </tbody>
+        </table>
+        <h4 ng-hide="filteredRecs.length || !loaded">No Records were found...</h4>
+        <progressbar class="progress-striped active" max="100" value="100" type="info" ng-hide="loaded">Geting records...</progressbar>
+    </div>
+    <footer class="col-sm-12  modal-footer">
+
+        <pagination total-items="filteredItems" items-per-page="itemPerPage" ng-model="currentPage" ng-change="pageChanged()"></pagination>
+        <p>&copy; Eitanf 2014</p>
+    </footer>
+</div>
+<!-- /container -->
+
+</body>
+</html>
