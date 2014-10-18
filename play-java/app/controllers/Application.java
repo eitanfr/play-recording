@@ -14,7 +14,6 @@ import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import sun.net.ftp.FtpClient;
-import views.html.index;
 import actions.CorsComposition;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -26,6 +25,7 @@ public class Application extends Controller {
 
 		try {
 			Confing confing = Confing.getInstance();
+		
 			return ok(views.html.index.render(""));
 
 		} catch (Exception e) {
