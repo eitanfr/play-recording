@@ -79,16 +79,17 @@
             </p>
         </div>
         <div class="modal-footer">
-            <a href="{{createDownloadUrl()}}" download>
-                <button class="btn btn-success" ng-click="ok()" ng-disabled="disable()">DownLoad</button>
-            </a>
+            <!--<a href="{{createDownloadUrl()}}" download>-->
+                <!--<button class="btn btn-success" ng-click="ok()" ng-disabled="disable()">DownLoad</button>-->
+            <!--</a>-->
+            <button class="btn btn-success" ng-click="download()" ng-disabled="disable()">DownLoad</button>
             <button class="btn btn-warning" ng-click="ftp()" ng-disabled="disable()">FTP</button>
 
             <button class="btn btn-default" ng-click="cancel()">Cancel</button>
             <div ng-show="showProbar">
                 <hr>
                 {{msg}}
-                <progressbar class="progress-striped active" max="100" value="100" type="success">Uploading...</progressbar>
+                <progressbar class="progress-striped active" max="100" value="100" type="{{barType}}">{{barText}}</progressbar>
             </div>
         </div>
     </script>
