@@ -25,14 +25,14 @@ public class Application extends Controller {
 
 		try {
 			Confing confing = Confing.getInstance();
-		
+
 			return ok(views.html.index.render(""));
 
 		} catch (Exception e) {
 			Logger.error("Error ", e);
 			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 "
-							+ e.getMessage() + "</h3>").as("text/html");
+					" INTERNAL_SERVER_ERROR 500 " + e.getMessage() + "</h3>")
+					.as("text/html");
 		}
 
 	}
@@ -46,53 +46,70 @@ public class Application extends Controller {
 			// Get records
 			records = RecordManager.getAllRecords(Confing.getInstance());
 			recJson = Json.toJson(records);
-			
-			
 
 		} catch (Exception e) {
 			Logger.error("Error ", e);
 			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 "
-							+ e.getMessage() ).as("text/html");
+					" INTERNAL_SERVER_ERROR 500 " + e.getMessage()).as(
+					"text/html");
 		}
 
 		return ok(recJson);
 	}
 
+	public static Result compress(String files) {
+		String convertedFiles;
+		try {
+			 convertedFiles = getCompressedFiles(files,false);
+		} catch (Exception e) {
+			Logger.error("Error ", e);
+			return internalServerError(
+					" INTERNAL_SERVER_ERROR 500 " + e.getMessage()).as(
+					"text/html");
+		}
+
+		return ok(convertedFiles);
+	}
+	
 	public static Result download(String file) {
 		// TODO: problem with hebrew, not inmportant
 		File fileToDownload = null;
 		try {
-			fileToDownload = getFilesToDownload(file);
-			// if empty do nothing
-			if (fileToDownload == null)
+			// Check and validate
+			if (file== null || file.isEmpty())
 				return ok();
-
+			
+			fileToDownload = new File(file);
+			
 		} catch (Exception e) {
 			Logger.error("Error " + e.getMessage(), e);
 			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 "
-							+ e.getMessage() + "</h3>").as("text/html");
+					" INTERNAL_SERVER_ERROR 500 " + e.getMessage() + "</h3>")
+					.as("text/html");
 		}
 
 		return ok(fileToDownload);
 	}
 
-	private static File getFilesToDownload(String file) throws Exception {
-		File fileToDownload;
-		String[] files = file.split(",");
+	private static String getCompressedFiles(String files , boolean csv) throws Exception {
+		String compressedFileName = null;
+		if (files != null) {
+			String[] filesArray = files.split(",");
+			if (filesArray.length == 0) {
+				return null;
+			}
+			else {
+				if (filesArray.length == 1) {
+						compressedFileName = RecordManager.convertToCsv(filesArray[0],csv);
+				} else {
+					compressedFileName = RecordManager.compressToZip(filesArray,csv);
+				}
+			}
 
-		// TODO: check if csv
-		if (files.length == 0) {
-			return null;
 		}
-		if (files.length == 1) {
-			fileToDownload = new File(RecordManager.getRecFileNames().get(
-					files[0]));
-		} else {
-			fileToDownload = RecordManager.compressToZip(files);
-		}
-		return fileToDownload;
+		
+		// TODO: remove csv?
+		return compressedFileName;
 	}
 
 	public static Result ftp(String files) {
@@ -116,22 +133,21 @@ public class Application extends Controller {
 			ftpClient.setBinaryType();
 
 			// put file
-			File recordsFile = getFilesToDownload(files);
+			String recordsFile = Application.getCompressedFiles(files, false);
 			if (recordsFile != null) {
-				String fileName = recordsFile.getName();
-				ftpClient.putFile(fileName, new FileInputStream(recordsFile));
+				ftpClient.putFile(recordsFile, new FileInputStream(recordsFile));
 			}
 
 		} catch (ConnectException e) {
 			Logger.error("Error ", e);
 			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 "
-							+ e.getMessage() + "</h3>" + "can't connect to ftp server").as("text/html");
+					" INTERNAL_SERVER_ERROR 500 " + e.getMessage() + "</h3>"
+							+ "can't connect to ftp server").as("text/html");
 		} catch (Exception e) {
 			Logger.error("Error ", e);
 			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 "
-							+ e.getMessage() + "</h3>").as("text/html");
+					" INTERNAL_SERVER_ERROR 500 " + e.getMessage() + "</h3>")
+					.as("text/html");
 		} finally {
 			if (ftpClient.isConnected()) {
 				try {

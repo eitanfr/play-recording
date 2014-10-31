@@ -115,7 +115,7 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
         });
     };
 
-    var ModalInstanceCtrl = function ($scope, $modalInstance, $http) {
+    var ModalInstanceCtrl = function ($scope, $modalInstance, $http,$timeout) {
 
 
         $scope.ok = function () {
@@ -136,8 +136,35 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
             return url;
         };
 
+        $scope.download = function(){
+            $scope.barType = 'info';
+            $scope.barText ='Converting ...';
+            $scope.showProbar = true;
+            var url = '/compress?files=';
+            for (var i in choosenRecords) {
+                url = url + choosenRecords[i] + ',';
+            }
+
+            $http.get(url).success(function (data) {
+                $scope.showProbar = false;
+                $modalInstance.close();
+
+                var link =document.createElement('A');
+                link.href = '/download?file=' + data;
+                link.download = '';
+                link.click();
+            }).
+                error(function (data) {
+                    $modalInstance.close();
+                    $scope.showProbar = false;
+                    alert(data);
+                });
+        }
+
         $scope.showProbar = false;
         $scope.ftp = function () {
+            $scope.barType = 'warning';
+            $scope.barText ='Uploding ...';
             $scope.showProbar = true;
             var url = '/ftp?files=';
             for (var i in choosenRecords) {
@@ -145,9 +172,12 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
             }
 
             $http.get(url).success(function (data) {
-                $modalInstance.close();
-                $scope.showProbar = false;
-
+                $scope.barType = 'success';
+                $scope.barText ='Finished';
+                $timeout(function(){
+                    $modalInstance.close();
+                    $scope.showProbar = false;
+                },2000);
             }).
                 error(function (data) {
                     $modalInstance.close();
@@ -190,7 +220,6 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
         $scope.endTime = new Date(0);
         $scope.endTime.setMinutes(0);
         $scope.endTime.setHours(new Date().getHours() + 1);
-
     };
 
     init();

@@ -5,7 +5,8 @@
 # Home page
 GET     /                           controllers.Application.index()
 GET     /hello                      controllers.Application.sayHello()
-GET     /download					controllers.Application.download(files: String)
+GET     /compress					controllers.Application.compress(files: String)
+GET     /download					controllers.Application.download(file: String)
 GET     /ftp						controllers.Application.ftp(files: String)
 
 

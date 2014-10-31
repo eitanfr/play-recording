@@ -14,76 +14,87 @@ import models.Record;
 
 public class RecordManager {
 
-	private static final String RECORDS_ZIP = "\\records.zip";
-	private static Map<String, String> recFileNames = new HashMap<String, String>();
+    private static final String RECORDS_ZIP = "\\records.zip";
+    private static Map<String, String> recFileNames = new HashMap<String, String>();
 
-	public static Map<String, String> getRecFileNames() {
-		return recFileNames;
-	}
+    public static Map<String, String> getRecFileNames() {
+        return recFileNames;
+    }
 
-	public static List<Record> getAllRecords(Confing confing) throws Exception {
-		String[] recordDirs = confing.getRecordsDir();
+    public static List<Record> getAllRecords(Confing confing) throws Exception {
+        String[] recordDirs = confing.getRecordsDir();
 
-		List<Record> recordList = new ArrayList<Record>();
-		for (String recDirPath : recordDirs) {
-			File dir = new File(recDirPath);
+        List<Record> recordList = new ArrayList<Record>();
+        for (String recDirPath : recordDirs) {
+            File dir = new File(recDirPath);
 
-			// TODO: error msg?
-			if (dir.exists() && dir.isDirectory()) {
-				for (File recordFile : dir.listFiles()) {
-					Record rec = new Record();
-					rec.setName(recordFile.getName());
-					rec.setDate(recordFile.lastModified());
-					rec.setSize(recordFile.length());
+            // TODO: error msg?
+            if (dir.exists() && dir.isDirectory()) {
+                for (File recordFile : dir.listFiles()) {
+                    Record rec = new Record();
+                    rec.setName(recordFile.getName());
+                    rec.setDate(recordFile.lastModified());
+                    rec.setSize(recordFile.length());
 
-					recordList.add(rec);
+                    recordList.add(rec);
 
-					// Add to map
-					recFileNames.put(recordFile.getName(),
-							recordFile.getAbsolutePath());
-				}
-			}
-			else{
-				throw new Exception("config rec dir: " +recDirPath + "not exists or is not a directory");
-			}
-		}
-		return recordList;
-	}
+                    // Add to map
+                    recFileNames.put(recordFile.getName(),
+                            recordFile.getAbsolutePath());
+                }
+            } else {
+                throw new Exception("config rec dir: " + recDirPath + "not exists or is not a directory");
+            }
+        }
+        return recordList;
+    }
 
-	public static File compressToZip(String[] fileNames) throws Exception {
-		FileOutputStream fileZip = new FileOutputStream(Confing.getInstance()
-				.getRecordsDir()[0] + RECORDS_ZIP);
+    public static String compressToZip(String[] fileNames, boolean csv) throws Exception {
+        // TODO: Set path?
+        // TODO: change zipTo many names
+        FileOutputStream fileZip = new FileOutputStream(Confing.getInstance()
+                .getRecordsDir()[0] + RECORDS_ZIP);
 
-		ZipOutputStream zipOutputStream = new ZipOutputStream(fileZip);
+        ZipOutputStream zipOutputStream = new ZipOutputStream(fileZip);
 
-		// TODO: change size?
-		byte[] buf = new byte[1024];
+        byte[] buf = new byte[1024];
 
-		for (String fileToDownload : fileNames) {
-			// Open rec file
-			FileInputStream in = new FileInputStream(
-					recFileNames.get(fileToDownload));
+        for (String fileName : fileNames) {
+            // Convert to csv if needed
+            String filePathToZip = convertToCsv(fileName, csv);
+            File fileToZip = new File(filePathToZip);
 
-			// Add ZIP entry to output stream.
-			zipOutputStream.putNextEntry(new ZipEntry(fileToDownload));
+            // Open rec/csv file
+            FileInputStream in = new FileInputStream(fileToZip);
 
-			// Transfer bytes from the file to the ZIP file
-			int len;
+            // Add ZIP entry to output stream.
+            zipOutputStream.putNextEntry(new ZipEntry(fileName));
 
-			while ((len = in.read(buf)) > 0) {
-				zipOutputStream.write(buf, 0, len);
-			}
+            // Transfer bytes from the file to the ZIP file
+            int len;
 
-			// Complete the entry
-			zipOutputStream.closeEntry();
+            while ((len = in.read(buf)) > 0) {
+                zipOutputStream.write(buf, 0, len);
+            }
 
-			in.close();
-		}
-		zipOutputStream.close();
+            // Complete the entry
+            zipOutputStream.closeEntry();
 
-		return new File(Confing.getInstance().getRecordsDir()[0] + RECORDS_ZIP);
-	}
+            in.close();
+        }
+        zipOutputStream.close();
 
-	
+        return Confing.getInstance().getRecordsDir()[0] + RECORDS_ZIP;
+    }
+
+    public static String convertToCsv(String fileName, boolean isCsv) {
+        if (isCsv) {
+            // TODO this...
+            return getRecFileNames().get(fileName) ;
+        } else {
+            return getRecFileNames().get(fileName) ;
+        }
+    }
+
 
 }
