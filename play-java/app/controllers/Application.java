@@ -1,5 +1,14 @@
 package controllers;
 
+import actions.CorsComposition;
+import com.fasterxml.jackson.databind.JsonNode;
+import models.Record;
+import play.Logger;
+import play.libs.Json;
+import play.mvc.Controller;
+import play.mvc.Result;
+import sun.net.ftp.FtpClient;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -7,16 +16,6 @@ import java.net.ConnectException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.List;
-
-import models.Record;
-import play.Logger;
-import play.libs.Json;
-import play.mvc.Controller;
-import play.mvc.Result;
-import sun.net.ftp.FtpClient;
-import actions.CorsComposition;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 @CorsComposition.Cors
 public class Application extends Controller {
@@ -70,22 +69,26 @@ public class Application extends Controller {
 
 		return ok(convertedFiles);
 	}
-	
-	public static Result download(String file) {
+
+    /**
+     * @param file full path
+     * @return
+     */
+    public static Result download(String file) {
 		// TODO: problem with hebrew, not inmportant
 		File fileToDownload = null;
 		try {
 			// Check and validate
 			if (file== null || file.isEmpty())
-				return ok();
-			
-			fileToDownload = new File(file);
+                throw new Exception("Tried to download with an empty file name");
+
+            fileToDownload = new File(file);
 			
 		} catch (Exception e) {
-			Logger.error("Error " + e.getMessage(), e);
-			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 " + e.getMessage() + "</h3>")
-					.as("text/html");
+            Logger.error("Error: " + e.getMessage(), e);
+            return internalServerError(
+                    " INTERNAL_SERVER_ERROR 500 " + e.getMessage())
+                    .as("text/html");
 		}
 
 		return ok(fileToDownload);

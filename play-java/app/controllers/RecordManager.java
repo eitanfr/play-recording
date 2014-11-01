@@ -1,5 +1,7 @@
 package controllers;
 
+import models.Record;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -9,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
-import models.Record;
 
 public class RecordManager {
 
@@ -28,7 +28,6 @@ public class RecordManager {
         for (String recDirPath : recordDirs) {
             File dir = new File(recDirPath);
 
-            // TODO: error msg?
             if (dir.exists() && dir.isDirectory()) {
                 for (File recordFile : dir.listFiles()) {
                     Record rec = new Record();
