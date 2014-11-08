@@ -1,20 +1,19 @@
 package controllers;
 
 import models.Record;
+import play.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 public class RecordManager {
 
-    private static final String RECORDS_ZIP = "\\records.zip";
+    private static final java.lang.String TINE_FORMAT = "dd-MM-yy_HH-mm";
     private static Map<String, String> recFileNames = new HashMap<String, String>();
 
     public static Map<String, String> getRecFileNames() {
@@ -49,10 +48,13 @@ public class RecordManager {
     }
 
     public static String compressToZip(String[] fileNames, boolean csv) throws Exception {
-        // TODO: Set path?
-        // TODO: change zipTo many names
+        // Create zip file name
+        SimpleDateFormat format = new SimpleDateFormat(TINE_FORMAT);
+        String currentDateString = format.format(new Date());
+        String recordsZipFileName = "//Records-" + currentDateString + ".zip";
+
         FileOutputStream fileZip = new FileOutputStream(Confing.getInstance()
-                .getRecordsDir()[0] + RECORDS_ZIP);
+                .getTempFilesPath() + recordsZipFileName);
 
         ZipOutputStream zipOutputStream = new ZipOutputStream(fileZip);
 
@@ -61,6 +63,7 @@ public class RecordManager {
         for (String fileName : fileNames) {
             // Convert to csv if needed
             String filePathToZip = convertToCsv(fileName, csv);
+            Logger.debug(filePathToZip + " before: " + fileName);
             File fileToZip = new File(filePathToZip);
 
             // Open rec/csv file
@@ -83,15 +86,16 @@ public class RecordManager {
         }
         zipOutputStream.close();
 
-        return Confing.getInstance().getRecordsDir()[0] + RECORDS_ZIP;
+        return Confing.getInstance().getTempFilesPath() + recordsZipFileName;
     }
 
     public static String convertToCsv(String fileName, boolean isCsv) {
         if (isCsv) {
             // TODO this...
-            return getRecFileNames().get(fileName) ;
+            // TODO save in temp files path
+            return getRecFileNames().get(fileName);
         } else {
-            return getRecFileNames().get(fileName) ;
+            return getRecFileNames().get(fileName);
         }
     }
 

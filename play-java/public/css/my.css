@@ -5,23 +5,33 @@
 }
 
 /*.tr-records {display: block; }*/
-.td-rec1 { width: 8%}
-.td-rec2 { width: 50%}
-.td-rec3 { width: 25%}
-.td-rec4 { width: 20%}
+.td-rec1 {
+    width: 8%
+}
+
+.td-rec2 {
+    width: 50%
+}
+
+.td-rec3 {
+    width: 25%
+}
+
+.td-rec4 {
+    width: 20%
+}
+
 /*.tbody-rec { display: block; height: 350px; overflow: auto;}*/
 
-
-.checked-true{
+.checked-true {
     background-color: #dff0d8;
 }
 
-.checked{
+.checked {
     background-color: #dff0d8;
 }
 
-
-.arrow-true-true{
+.arrow-true-true {
     display: inline-block;
     width: 0;
     height: 0;
@@ -35,7 +45,7 @@
 
 }
 
-.arrow-true-false{
+.arrow-true-false {
     display: inline-block;
     width: 0;
     height: 0;
@@ -46,11 +56,46 @@
     margin: 10px 5px;
 }
 
-
-.fixed-date-label{
+.fixed-date-label {
     padding-top: 40px;
 }
 
-.fixed-datepicker{
+.fixed-datepicker {
     padding-top: 34px;
 }
+
+.ng-enter,
+.ng-leave,
+.ng-move {
+    -webkit-transition: 0.3s linear all;
+    -moz-transition: 0.3s linear all;
+    -o-transition: 0.3s linear all;
+    transition: 0.3s linear all;
+}
+
+.ng-enter,
+.ng-move {
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.ng-move.ng-move-active,
+.ng-enter.ng-enter-active {
+    opacity: 1;
+}
+
+.ng-leave {
+    opacity: 1;
+    overflow: hidden;
+}
+
+.ng-leave.ng-leave-active {
+    opacity: 0;
+    height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+
+

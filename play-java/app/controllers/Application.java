@@ -20,151 +20,167 @@ import java.util.List;
 @CorsComposition.Cors
 public class Application extends Controller {
 
-	public static Result index() {
+    private static final String USERNAME = "rakia";
+    private static final String PASSWORD = "rakia";
 
-		try {
-			Confing confing = Confing.getInstance();
+    public static Result index() {
 
-			return ok(views.html.index.render(""));
+        try {
+            Confing confing = Confing.getInstance();
 
-		} catch (Exception e) {
-			Logger.error("Error ", e);
-			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 " + e.getMessage() + "</h3>")
-					.as("text/html");
-		}
+            return ok(views.html.index.render(""));
 
-	}
+        } catch (Exception e) {
+            Logger.error("Error ", e);
+            return internalServerError(
+                    " INTERNAL_SERVER_ERROR 500 " + e.getMessage() + "</h3>")
+                    .as("text/html");
+        }
 
-	public static Result sayHello() {
+    }
 
-		List<Record> records = null;
-		JsonNode recJson = null;
+    public static Result sayHello() {
 
-		try {
-			// Get records
-			records = RecordManager.getAllRecords(Confing.getInstance());
-			recJson = Json.toJson(records);
+        List<Record> records = null;
+        JsonNode recJson = null;
 
-		} catch (Exception e) {
-			Logger.error("Error ", e);
-			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 " + e.getMessage()).as(
-					"text/html");
-		}
+        try {
+            // Get records
+            records = RecordManager.getAllRecords(Confing.getInstance());
+            recJson = Json.toJson(records);
 
-		return ok(recJson);
-	}
+        } catch (Exception e) {
+            Logger.error("Error ", e);
+            return internalServerError(
+                    " INTERNAL_SERVER_ERROR 500 " + e.getMessage()).as(
+                    "text/html");
+        }
 
-	public static Result compress(String files) {
-		String convertedFiles;
-		try {
-			 convertedFiles = getCompressedFiles(files,false);
-		} catch (Exception e) {
-			Logger.error("Error ", e);
-			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 " + e.getMessage()).as(
-					"text/html");
-		}
+        return ok(recJson);
+    }
 
-		return ok(convertedFiles);
-	}
+    public static Result compress(String files) {
+        String convertedFile;
+        try {
+            convertedFile = getCompressedFiles(files, false);
+        } catch (Exception e) {
+            Logger.error("Error ", e);
+            return internalServerError(
+                    " INTERNAL_SERVER_ERROR 500 " + e.getMessage()).as(
+                    "text/html");
+        }
+
+        return ok(convertedFile);
+    }
 
     /**
      * @param file full path
      * @return
      */
     public static Result download(String file) {
-		// TODO: problem with hebrew, not inmportant
-		File fileToDownload = null;
-		try {
-			// Check and validate
-			if (file== null || file.isEmpty())
+        // TODO: problem with hebrew, not inmportant
+        File fileToDownload = null;
+        try {
+            // Check and validate
+            if (file == null || file.isEmpty())
                 throw new Exception("Tried to download with an empty file name");
 
             fileToDownload = new File(file);
-			
-		} catch (Exception e) {
+
+        } catch (Exception e) {
             Logger.error("Error: " + e.getMessage(), e);
             return internalServerError(
                     " INTERNAL_SERVER_ERROR 500 " + e.getMessage())
                     .as("text/html");
-		}
+        }
 
-		return ok(fileToDownload);
-	}
+        return ok(fileToDownload);
+    }
 
-	private static String getCompressedFiles(String files , boolean csv) throws Exception {
-		String compressedFileName = null;
-		if (files != null) {
-			String[] filesArray = files.split(",");
-			if (filesArray.length == 0) {
-				return null;
-			}
-			else {
-				if (filesArray.length == 1) {
-						compressedFileName = RecordManager.convertToCsv(filesArray[0],csv);
-				} else {
-					compressedFileName = RecordManager.compressToZip(filesArray,csv);
-				}
-			}
+    private static String getCompressedFiles(String files, boolean csv) throws Exception {
+        String compressedFileName = null;
+        if (files != null) {
+            String[] filesArray = files.split(",");
+            if (filesArray.length == 0) {
+                return null;
+            } else {
+                if (filesArray.length == 1) {
+                    compressedFileName = RecordManager.convertToCsv(filesArray[0], csv);
+                } else {
+                    compressedFileName = RecordManager.compressToZip(filesArray, csv);
+                }
+            }
 
-		}
-		
-		// TODO: remove csv?
-		return compressedFileName;
-	}
+        }
 
-	public static Result ftp(String files) {
-		FtpClient ftpClient = FtpClient.create();
-		try {
-			// connect
-			int port = FtpClient.defaultPort(); // TODO: default 21 check if
-												// realy it is ...
-			InetAddress hostname = InetAddress.getByName(Confing.getInstance()
-					.getFtpIpAdress());
-			InetSocketAddress adress = new InetSocketAddress(hostname, port);
-			ftpClient.connect(adress);
+        // TODO: remove csv?
+        return compressedFileName;
+    }
 
-			// login
-			String user = Confing.getInstance().getFTPUsername();
-			char[] password = Confing.getInstance().getFTPPass().toCharArray();
-			ftpClient.login(user, password);
+    public static Result ftp(String files) {
+        FtpClient ftpClient = FtpClient.create();
+        try {
+            // connect
+            int port = FtpClient.defaultPort(); // TODO: default 21 check if
+            // realy it is ...
+            InetAddress hostname = InetAddress.getByName(Confing.getInstance()
+                    .getFtpIpAdress());
+            InetSocketAddress adress = new InetSocketAddress(hostname, port);
+            ftpClient.connect(adress);
 
-			// set mode
-			ftpClient.enablePassiveMode(true); // TODO: validate
-			ftpClient.setBinaryType();
+            // login
+            String user = Confing.getInstance().getFTPUsername();
+            char[] password = Confing.getInstance().getFTPPass().toCharArray();
+            ftpClient.login(user, password);
 
-			// put file
-			String recordsFile = Application.getCompressedFiles(files, false);
-			if (recordsFile != null) {
-				ftpClient.putFile(recordsFile, new FileInputStream(recordsFile));
-			}
+            // set mode
+            ftpClient.enablePassiveMode(true); // TODO: validate
+            ftpClient.setBinaryType();
 
-		} catch (ConnectException e) {
-			Logger.error("Error ", e);
-			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 " + e.getMessage() + "</h3>"
-							+ "can't connect to ftp server").as("text/html");
-		} catch (Exception e) {
-			Logger.error("Error ", e);
-			return internalServerError(
-					" INTERNAL_SERVER_ERROR 500 " + e.getMessage() + "</h3>")
-					.as("text/html");
-		} finally {
-			if (ftpClient.isConnected()) {
-				try {
-					ftpClient.close();
-				} catch (IOException e) {
-					Logger.error(e.getMessage());
-				}
-			}
-		}
-		return ok("ftp completed");
-	}
+            // put file
+            String recordsFile = Application.getCompressedFiles(files, false);
+            if (recordsFile != null) {
+                ftpClient.putFile(recordsFile, new FileInputStream(recordsFile));
+            }
 
-	public static Result preflight(String path) {
-		return ok("");
-	}
+        } catch (ConnectException e) {
+            Logger.error("Error ", e);
+            return internalServerError(
+                    " INTERNAL_SERVER_ERROR 500 " + e.getMessage() +
+                            "can't connect to ftp server").as("text/html");
+        } catch (Exception e) {
+            Logger.error("Error ", e);
+            return internalServerError(
+                    " INTERNAL_SERVER_ERROR 500 " + e.getMessage())
+                    .as("text/html");
+        } finally {
+            if (ftpClient.isConnected()) {
+                try {
+                    ftpClient.close();
+                } catch (IOException e) {
+                    Logger.error(e.getMessage());
+                }
+            }
+        }
+        return ok("ftp completed");
+    }
+
+    public static Result preflight(String path) {
+        return ok("");
+    }
+
+    public static Result login() {
+        JsonNode userJson = request().body().asJson();
+        Logger.debug("Tried to login: " + userJson.toString());
+        String username = userJson.findPath("user").textValue();
+        String password = userJson.findPath("password").textValue();
+
+        if (username.equals(USERNAME) && password.equals(PASSWORD)) {
+
+            return ok();
+        } else {
+            return badRequest("Invalid user or password");
+        }
+    }
 
 }

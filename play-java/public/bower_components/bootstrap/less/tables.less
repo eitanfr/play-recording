@@ -2,14 +2,20 @@
 // Tables
 // --------------------------------------------------
 
-
 table {
   background-color: @table-bg;
 }
-th {
+
+caption {
+  padding-top: @table-cell-padding;
+  padding-bottom: @table-cell-padding;
+  color: @text-muted;
   text-align: left;
 }
 
+th {
+  text-align: left;
+}
 
 // Baseline styles
 
@@ -58,7 +64,6 @@ th {
   }
 }
 
-
 // Condensed table w/ half padding
 
 .table-condensed {
@@ -73,7 +78,6 @@ th {
     }
   }
 }
-
 
 // Bordered version
 //
@@ -99,20 +103,15 @@ th {
   }
 }
 
-
 // Zebra-striping
 //
 // Default zebra-stripe styles (alternating gray and transparent backgrounds)
 
 .table-striped {
   > tbody > tr:nth-child(odd) {
-    > td,
-    > th {
-      background-color: @table-bg-accent;
-    }
+    background-color: @table-bg-accent;
   }
 }
-
 
 // Hover effect
 //
@@ -120,13 +119,9 @@ th {
 
 .table-hover {
   > tbody > tr:hover {
-    > td,
-    > th {
-      background-color: @table-bg-hover;
-    }
+    background-color: @table-bg-hover;
   }
 }
-
 
 // Table cell sizing
 //
@@ -137,6 +132,7 @@ table col[class*="col-"] {
   float: none;
   display: table-column;
 }
+
 table {
   td,
   th {
@@ -147,7 +143,6 @@ table {
     }
   }
 }
-
 
 // Table backgrounds
 //
@@ -161,7 +156,6 @@ table {
 .table-row-variant(warning; @state-warning-bg);
 .table-row-variant(danger; @state-danger-bg);
 
-
 // Responsive tables
 //
 // Wrap your tables in `.table-responsive` and we'll make them mobile friendly
@@ -169,14 +163,15 @@ table {
 // will display normally.
 
 .table-responsive {
+  overflow-x: auto;
+  min-height: 0.01%; // Workaround for IE9 bug (see https://github.com/twbs/bootstrap/issues/14837)
+
   @media screen and (max-width: @screen-xs-max) {
     width: 100%;
     margin-bottom: (@line-height-computed * 0.75);
     overflow-y: hidden;
-    overflow-x: auto;
     -ms-overflow-style: -ms-autohiding-scrollbar;
     border: 1px solid @table-border-color;
-    -webkit-overflow-scrolling: touch;
 
     // Tighten up spacing
     > .table {

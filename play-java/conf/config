@@ -1,4 +1,7 @@
+# use '\\' for windows
 recordDir=D:\\programing\\recordsMocks
 ftpUsername=xxx
 ftpPassword=xxx
 ftpIp=12.12.12.12
+# where temp records files will be saved
+tempFilesPath=D:\\programing\\recordsMocks

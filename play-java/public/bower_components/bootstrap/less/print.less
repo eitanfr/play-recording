@@ -1,15 +1,18 @@
-//
-// Basic print styles
-// --------------------------------------------------
-// Source: https://github.com/h5bp/html5-boilerplate/blob/master/css/main.css
+/*! Source: https://github.com/h5bp/html5-boilerplate/blob/master/src/css/main.css */
+
+// ==========================================================================
+// Print styles.
+// Inlined to avoid the additional HTTP request: h5bp.com/r
+// ==========================================================================
 
 @media print {
-
-  * {
-    text-shadow: none !important;
-    color: #000 !important; // Black prints faster: h5bp.com/s
+  *,
+  *:before,
+  *:after {
     background: transparent !important;
+    color: #000 !important; // Black prints faster: h5bp.com/s
     box-shadow: none !important;
+    text-shadow: none !important;
   }
 
   a,
@@ -25,9 +28,10 @@
     content: " (" attr(title) ")";
   }
 
-  // Don't show links for images, or javascript/internal links
-  a[href^="javascript:"]:after,
-  a[href^="#"]:after {
+  // Don't show links that are fragment identifiers,
+  // or use the `javascript:` pseudo protocol
+  a[href^="#"]:after,
+  a[href^="javascript:"]:after {
     content: "";
   }
 
@@ -62,6 +66,8 @@
     page-break-after: avoid;
   }
 
+  // Bootstrap specific changes start
+  //
   // Chrome (OSX) fix for https://github.com/twbs/bootstrap/issues/11245
   // Once fixed, we can just straight up remove this.
   select {
@@ -72,25 +78,27 @@
   .navbar {
     display: none;
   }
-  .table {
-    td,
-    th {
-      background-color: #fff !important;
-    }
-  }
+
   .btn,
   .dropup > .btn {
     > .caret {
       border-top-color: #000 !important;
     }
   }
+
   .label {
     border: 1px solid #000;
   }
 
   .table {
     border-collapse: collapse !important;
+
+    td,
+    th {
+      background-color: #fff !important;
+    }
   }
+
   .table-bordered {
     th,
     td {
@@ -98,4 +106,5 @@
     }
   }
 
+  // Bootstrap specific changes end
 }

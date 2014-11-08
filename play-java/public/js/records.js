@@ -1,4 +1,4 @@
-var myModule = angular.module('myModule', ['ui.bootstrap']);
+var myModule = angular.module('myModule', ['ui.bootstrap', 'ngAnimate']);
 
 myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal, $http) {
 
@@ -6,28 +6,27 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
     var choosenRecords = [];
     $scope.itemPerPage = 15;
 
-    $scope.loaded =false;
+    $scope.loaded = false;
     $http.get('/hello').success(function (data) {
         $scope.recordsList = data;
         $scope.loaded = true;
-    }).error(function(data){
-        alert('Error loading records form server: ' +data);
+    }).error(function (data) {
+        alert('Error loading records form server: ' + data);
         $scope.loaded = true;
     });
 
     $scope.records = [];
 
-    $scope.clearChoosen = function(){
-        for (var i =0 ; i < $scope.recordsList.length ; i++){
+    $scope.clearChoosen = function () {
+        for (var i = 0; i < $scope.recordsList.length; i++) {
             $scope.recordsList[i].checked = false;
 
         }
-        choosenRecords =[];
+        choosenRecords = [];
 
     };
 
-    var clearChoosen =  $scope.clearChoosen;
-
+    var clearChoosen = $scope.clearChoosen;
 
 
     $scope.totalItems = $scope.recordsList.length;
@@ -98,10 +97,10 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
         record.checked = !record.checked;
 
         if (record.checked) {
-            choosenRecords.push(record.name);
+            choosenRecords.push(record);
         }
         else {
-            var indexToRemove = choosenRecords.indexOf(record.name);
+            var indexToRemove = choosenRecords.indexOf(record);
             if (indexToRemove >= 0)
                 choosenRecords.splice(indexToRemove, 1);
         }
@@ -115,7 +114,7 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
         });
     };
 
-    var ModalInstanceCtrl = function ($scope, $modalInstance, $http,$timeout) {
+    var ModalInstanceCtrl = function ($scope, $modalInstance, $http, $timeout) {
 
 
         $scope.ok = function () {
@@ -127,29 +126,20 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
             $modalInstance.dismiss('cancel');
         };
 
-        $scope.createDownloadUrl = function () {
-            var url = '/download?files=';
-            for (var i in choosenRecords) {
-                url = url + choosenRecords[i] + ',';
-            }
-
-            return url;
-        };
-
-        $scope.download = function(){
+        $scope.download = function () {
             $scope.barType = 'info';
-            $scope.barText ='Converting ...';
+            $scope.barText = 'Converting ...';
             $scope.showProbar = true;
             var url = '/compress?files=';
             for (var i in choosenRecords) {
-                url = url + choosenRecords[i] + ',';
+                url = url + choosenRecords[i].name + ',';
             }
 
             $http.get(url).success(function (data) {
                 $scope.showProbar = false;
                 $modalInstance.close();
 
-                var link =document.createElement('A');
+                var link = document.createElement('A');
                 link.href = '/download?file=' + data;
                 link.download = '';
                 link.click();
@@ -164,20 +154,20 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
         $scope.showProbar = false;
         $scope.ftp = function () {
             $scope.barType = 'warning';
-            $scope.barText ='Uploding ...';
+            $scope.barText = 'Uploding ...';
             $scope.showProbar = true;
             var url = '/ftp?files=';
             for (var i in choosenRecords) {
-                url = url + choosenRecords[i] + ',';
+                url = url + choosenRecords[i].name + ',';
             }
 
             $http.get(url).success(function (data) {
                 $scope.barType = 'success';
-                $scope.barText ='Finished';
-                $timeout(function(){
+                $scope.barText = 'Finished';
+                $timeout(function () {
                     $modalInstance.close();
                     $scope.showProbar = false;
-                },2000);
+                }, 2000);
             }).
                 error(function (data) {
                     $modalInstance.close();
@@ -186,11 +176,21 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
                 });
         };
 
+        $scope.radioModel = 'rti';
         $scope.choosenRecords = choosenRecords;
 
-        $scope.disable = function(){
-            return (!$scope.radioModel ||  $scope.choosenRecords.length ==0);
-        }
+        $scope.disable = function () {
+            return (!$scope.radioModel || $scope.choosenRecords.length == 0);
+        };
+
+        $scope.getChoosenSize = function () {
+            var sum = 0;
+            for (var i in choosenRecords) {
+                sum += choosenRecords[i].size;
+            }
+
+            return sum;
+        };
     };
 
 
@@ -224,6 +224,17 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
 
     init();
 
+});
 
+
+myModule.controller('LoginCtrl', function LoginCtrl($scope, $http) {
+    $scope.login = function () {
+        var userData = {user: $scope.username, password: $scope.password};
+        $http.post('/login', userData).success(function (data) {
+            alert(data);
+        }).error(function (data) {
+            alert(data);
+        });
+    }
 
 });
