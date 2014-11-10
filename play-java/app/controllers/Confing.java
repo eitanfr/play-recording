@@ -12,19 +12,16 @@ public class Confing {
     private static final String PASSWORD = "ftpPassword";
     private static final String FTP_IP = "ftpIp";
     private static final String TEMP_FILE_PATH = "tempFilesPath";
+    private static final String RESEARCH_PATH = "researchPath";
     private Properties properties = new Properties();
 
-    private static Confing instace;
+    private static Confing instace = new Confing();
 
     public static Confing getInstance() throws Exception {
-        // I know it is wrong
-        if (instace == null) {
-            instace = new Confing();
-        }
         return instace;
     }
 
-    private Confing() throws Exception {
+    public  void init() throws Exception {
         String path = System.getenv(CONF_PATH);
 
         if (path == null) {
@@ -32,7 +29,12 @@ public class Confing {
                     + " environment variable should be: " + CONF_PATH);
         }
 
-        properties.load(new FileInputStream(path.concat(confingName)));
+        // Load data
+       properties.load(new FileInputStream(path.concat(confingName)));
+    }
+
+    private Confing()  {
+
     }
 
 
@@ -75,6 +77,14 @@ public class Confing {
         String pass = properties.getProperty(TEMP_FILE_PATH);
         if (pass == null)
             throw new Exception("could not found " + TEMP_FILE_PATH + " filed in configuration file: \n"
+                    + System.getenv(CONF_PATH) + confingName);
+        return pass;
+    }
+
+    public String getResearchsPath() throws Exception {
+        String pass = properties.getProperty(RESEARCH_PATH);
+        if (pass == null)
+            throw new Exception("could not found " + RESEARCH_PATH + " filed in configuration file: \n"
                     + System.getenv(CONF_PATH) + confingName);
         return pass;
     }

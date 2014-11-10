@@ -3,16 +3,17 @@
 # ~~~~
 
 # Home page
-GET            /                    controllers.Application.index()
-GET            /hello               controllers.Application.sayHello()
-GET            /compress            controllers.Application.compress(files: String)
-GET            /download            controllers.Application.download(file: String)
-GET            /ftp                 controllers.Application.ftp(files: String)
-POST           /login               controllers.Application.login()
+GET            /                         controllers.Application.index()
+GET            /hello                    controllers.Application.sayHello()
+GET            /compress                 controllers.Application.compress(files: String)
+GET            /download                 controllers.Application.download(file: String)
+GET            /ftp                      controllers.Application.ftp(files: String)
+POST           /login                    controllers.Application.login()
+GET            /toResearch               controllers.Application.toResearch(files: String)
+GET            /getAdditionalData        controllers.Application.getAdditionalData()
 
-
-OPTIONS        /*path               controllers.Application.preflight(path: String)
+OPTIONS        /*path                    controllers.Application.preflight(path: String)
 
 # Map static resources from the /public folder to the /assets URL path
-GET            /assets/*file        controllers.Assets.at(path="/public", file)
+GET            /assets/*file             controllers.Assets.at(path="/public", file)
 

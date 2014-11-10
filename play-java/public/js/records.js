@@ -1,7 +1,10 @@
-var myModule = angular.module('myModule', ['ui.bootstrap', 'ngAnimate']);
+var myModule = angular.module('myModule', ['ui.bootstrap', 'ngAnimate','ngCookies']);
 
-myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal, $http) {
+myModule.service('UserService',function(){
+   this.connected = false;
+});
 
+myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal, $http,UserService) {
     $scope.recordsList = [];
     var choosenRecords = [];
     $scope.itemPerPage = 15;
@@ -114,7 +117,7 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
         });
     };
 
-    var ModalInstanceCtrl = function ($scope, $modalInstance, $http, $timeout) {
+    var ModalInstanceCtrl = function ($scope, $modalInstance, $http, $timeout, UserService) {
 
 
         $scope.ok = function () {
@@ -179,8 +182,12 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
         $scope.radioModel = 'rti';
         $scope.choosenRecords = choosenRecords;
 
+        $scope.disableFtp = function () {
+            return (!UserService.connected || $scope.choosenRecords.length == 0);
+        };
+
         $scope.disable = function () {
-            return (!$scope.radioModel || $scope.choosenRecords.length == 0);
+            return ($scope.choosenRecords.length == 0);
         };
 
         $scope.getChoosenSize = function () {
@@ -227,14 +234,25 @@ myModule.controller('RecordsCtrl', function RecordsCtrl($scope, $filter, $modal,
 });
 
 
-myModule.controller('LoginCtrl', function LoginCtrl($scope, $http) {
+myModule.controller('LoginCtrl', function LoginCtrl($scope, $http,UserService) {
+    $scope.connected = false;
+    $scope.loginText = 'sign in';
     $scope.login = function () {
-        var userData = {user: $scope.username, password: $scope.password};
-        $http.post('/login', userData).success(function (data) {
-            alert(data);
-        }).error(function (data) {
-            alert(data);
-        });
-    }
-
+        if ($scope.connected ){
+            $scope.connected = false;
+            $scope.loginText = 'sign in';
+            alert('logout successfully');
+        }
+        else {
+            var userData = {user: $scope.username, password: $scope.password};
+            $http.post('/login', userData).success(function (data) {
+                UserService.connected = true;
+                $scope.connected = true;
+                $scope.loginText = 'sign out'
+                alert('login successfully');
+            }).error(function (data) {
+                alert(data);
+            });
+        }
+    };
 });
